@@ -1,8 +1,52 @@
-# Compiled class file
-*.class
+HELP.md
+/target/
+!.mvn/wrapper/maven-wrapper.jar
 
-# Log file
+# build-time files
+.metadata
+*.class
+*.swp
+tmp.*
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+/build/
+
+### VS Code ###
+.vscode/
+
+
+# log
 *.log
+/logs
+*.log.zip
+
+# MAC
+.DS_Store
+
+# excel file
+*.xlsx
+*.xls
+img/
 
 # BlueJ files
 *.ctxt
