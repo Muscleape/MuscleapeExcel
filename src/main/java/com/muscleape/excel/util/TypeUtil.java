@@ -1,8 +1,8 @@
 package com.muscleape.excel.util;
 
+import com.alibaba.fastjson.JSONObject;
 import com.muscleape.excel.metadata.ExcelColumnProperty;
 import com.muscleape.excel.metadata.ExcelHeadProperty;
-import com.alibaba.fastjson.JSONObject;
 import net.sf.cglib.beans.BeanMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -123,6 +123,7 @@ public class TypeUtil {
         return (ObjectUtils.isEmpty(jsonObject) || jsonObject.size() == 0) ? true : false;
     }
 
+
     public static Boolean isNum(Object cellValue) {
         if (cellValue instanceof Integer
                 || cellValue instanceof Double
@@ -211,7 +212,17 @@ public class TypeUtil {
 
     public static String formatDate(Date cellValue, String format) {
         SimpleDateFormat simpleDateFormat;
-        if (!StringUtils.isEmpty(format)) {
+        if (StringUtils.isNotBlank(format)) {
+            simpleDateFormat = new SimpleDateFormat(format);
+        } else {
+            simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        }
+        return simpleDateFormat.format(cellValue);
+    }
+
+    public static String formatDateTimeStamp(Long cellValue, String format) {
+        SimpleDateFormat simpleDateFormat;
+        if (StringUtils.isNotBlank(format)) {
             simpleDateFormat = new SimpleDateFormat(format);
         } else {
             simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -224,10 +235,17 @@ public class TypeUtil {
         Object value = beanMap.get(fieldName);
         if (value != null) {
             try {
-                if (value instanceof Date) {
-                    cellValue = TypeUtil.formatDate((Date) value, format);
-                } else {
-                    // 键值转换
+                if (StringUtils.isNotBlank(format)) {
+                    if (value instanceof Date) {
+                        cellValue = TypeUtil.formatDate((Date) value, format);
+                    } else if ((value instanceof Long) && StringUtils.isNotBlank(format)) {
+                        // 时间戳类型时间格式化
+                        cellValue = TypeUtil.formatDateTimeStamp((Long) value, format);
+                    } else {
+                        cellValue = value.toString();
+                    }
+                }
+                if (StringUtils.isNotBlank(keyValue)) {
                     JSONObject jsonObject = JSONObject.parseObject(keyValue);
                     if (null != jsonObject && jsonObject.size() > 0) {
                         cellValue = String.valueOf(jsonObject.get(value));

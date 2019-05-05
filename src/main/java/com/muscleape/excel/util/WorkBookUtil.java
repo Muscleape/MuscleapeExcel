@@ -70,11 +70,11 @@ public class WorkBookUtil {
         return cell;
     }
 
-    public static Cell createCell(Row row, int colNum, CellStyle cellStyle, Object cellValue, Boolean isNum, Boolean isEmptyJsonObject) {
+    public static Cell createCell(Row row, int colNum, CellStyle cellStyle, Object cellValue, Boolean isNum, Boolean isEmptyJsonObject, Boolean isDateFormatEmpty) {
         Cell cell = row.createCell(colNum);
         cell.setCellStyle(cellStyle);
         if (null != cellValue) {
-            if (isNum && isEmptyJsonObject) {
+            if (isNum && isEmptyJsonObject && isDateFormatEmpty) {
                 cell.setCellValue(Double.parseDouble(cellValue.toString()));
             } else {
                 cell.setCellValue(cellValue.toString());

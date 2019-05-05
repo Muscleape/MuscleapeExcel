@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,7 +117,7 @@ public class ExcelBuilderImpl implements ExcelBuilder {
             BaseRowModel baseRowModel = (BaseRowModel) oneRowData;
             String cellValue = TypeUtil.getFieldStringValue(beanMap, excelHeadProperty.getField().getName(), excelHeadProperty.getFormat(), excelHeadProperty.getKeyValue());
             CellStyle cellStyle = baseRowModel.getStyle(i) != null ? baseRowModel.getStyle(i) : context.getCurrentContentCellStyle();
-            Cell cell = WorkBookUtil.createCell(row, i, cellStyle, cellValue, TypeUtil.isNum(excelHeadProperty.getField()), TypeUtil.isEmptyJsonObject(excelHeadProperty.getKeyValue()));
+            Cell cell = WorkBookUtil.createCell(row, i, cellStyle, cellValue, TypeUtil.isNum(excelHeadProperty.getField()), TypeUtil.isEmptyJsonObject(excelHeadProperty.getKeyValue()), StringUtils.isEmpty(excelHeadProperty.getFormat()));
             if (null != context.getAfterWriteHandler()) {
                 context.getAfterWriteHandler().cell(i, cell);
             }
