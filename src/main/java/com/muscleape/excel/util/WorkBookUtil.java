@@ -10,6 +10,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 import static com.muscleape.excel.util.StyleUtil.buildSheetStyle;
 
@@ -63,6 +64,8 @@ public class WorkBookUtil {
         if (null != cellValue) {
             if (isNum) {
                 cell.setCellValue(Double.parseDouble(cellValue.toString()));
+            } else if (cellValue instanceof Date) {
+                cell.setCellValue(TypeUtil.formatDate((Date) cellValue, ""));
             } else {
                 cell.setCellValue(cellValue.toString());
             }
