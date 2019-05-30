@@ -131,36 +131,40 @@ public class WebWriteUtil {
     }
 
     /**
-     * 多次查询拼装成一个List后压缩导出
+     * 导出多个Excel文件，压缩ZIP包后下载
      *
      * @param response
-     * @param lists
-     * @param fileName
-     * @param object
+     * @param list     导出数据列表
+     * @param size     每个Excel文件中数据条数(最小10000条数据)
+     * @param fileName 文件名
      * @return void
      * @author Muscleape
-     * @date 2019/5/29 10:57
+     * @date 2019/5/10 17:46
      */
-    public static void writeLists2ExcelFileInZip(HttpServletResponse response, List<List<? extends BaseRowModel>> lists,
-                                                 String fileName, BaseRowModel object) throws IOException {
+    public static void writeOneList2ExcelFileInZip(HttpServletResponse response, List<? extends BaseRowModel> list,
+                                                   int size, String fileName, BaseRowModel object) throws IOException {
         String pathName = mkdirPath(fileName);
         fileName = pathName + "/" + pathName;
 
-        int count = 1;
-        for (List<? extends BaseRowModel> list : lists) {
+        size = (0 >= size) ? 10000 : size;
+        int fileCount = (list.size() % size == 0) ? (list.size() / size) : (list.size() / size + 1);
+
+        for (int i = 1; i <= fileCount; i++) {
             // 创建导出文件
-            OutputStream outputStream = new FileOutputStream(fileName + "(" + count + ").xlsx");
+            OutputStream outputStream = new FileOutputStream(fileName + "(" + i + ").xlsx");
             ExcelWriter excelWriter = MuscleapeExcelFactory.getWriter(outputStream);
+            List<? extends BaseRowModel> tempList = list.stream().skip((i - 1) * size).limit(size).collect(Collectors.toList());
             // 创建sheet
             MuscleapeSheet sheet = new MuscleapeSheet(1, 0, object.getClass());
-            sheet.setSheetName(String.valueOf(count));
-            excelWriter.write(list, sheet);
+            sheet.setSheetName(String.valueOf(i));
+            excelWriter.write(tempList, sheet);
             excelWriter.finish();
-            count += 1;
+            tempList.clear();
         }
-        lists.clear();
+        list.clear();
 
-        writeZipOutputStream(response, lists.size(), pathName, fileName);
+        // 导出处理
+        writeZipOutputStream(response, fileCount, pathName, fileName);
     }
 
     /**
