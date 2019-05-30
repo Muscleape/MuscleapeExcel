@@ -9,10 +9,13 @@ import com.muscleape.excel.support.ExcelTypeEnum;
 import org.springframework.util.ObjectUtils;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @Author: Muscleape
@@ -125,6 +128,125 @@ public class WebWriteUtil {
             excelWriter.write(tempList, sheet);
         }
         excelWriter.finish();
+    }
+
+    /**
+     * 多次查询拼装成一个List后压缩导出
+     *
+     * @param response
+     * @param lists
+     * @param fileName
+     * @param object
+     * @return void
+     * @author Muscleape
+     * @date 2019/5/29 10:57
+     */
+    public static void writeLists2ExcelFileInZip(HttpServletResponse response, List<List<? extends BaseRowModel>> lists,
+                                                 String fileName, BaseRowModel object) throws IOException {
+        String pathName = mkdirPath(fileName);
+        fileName = pathName + "/" + pathName;
+
+        int count = 1;
+        for (List<? extends BaseRowModel> list : lists) {
+            // 创建导出文件
+            OutputStream outputStream = new FileOutputStream(fileName + "(" + count + ").xlsx");
+            ExcelWriter excelWriter = MuscleapeExcelFactory.getWriter(outputStream);
+            // 创建sheet
+            MuscleapeSheet sheet = new MuscleapeSheet(1, 0, object.getClass());
+            sheet.setSheetName(String.valueOf(count));
+            excelWriter.write(list, sheet);
+            excelWriter.finish();
+            count += 1;
+        }
+        lists.clear();
+
+        writeZipOutputStream(response, lists.size(), pathName, fileName);
+    }
+
+    /**
+     * 创建临时excel文件路径
+     *
+     * @param fileName
+     * @return java.lang.String
+     * @author Muscleape
+     * @date 2019/5/29 10:25
+     */
+    private static String mkdirPath(String fileName) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+        String localDateTime = LocalDateTime.now().format(dateTimeFormatter);
+        String pathName = fileName + "_" + localDateTime + "_" + Thread.currentThread().getId();
+        File path = new File(pathName);
+        if (!path.exists()) {
+            path.mkdirs();
+        }
+        return pathName;
+    }
+
+    /**
+     * 写压缩包文件
+     *
+     * @param response
+     * @param fileCount
+     * @param pathName
+     * @param fileName
+     * @return void
+     * @author Muscleape
+     * @date 2019/5/29 10:38
+     */
+    private static void writeZipOutputStream(HttpServletResponse response, int fileCount, String pathName, String fileName) {
+        //设置压缩流：直接写入response，实现边压缩边下载
+        ZipOutputStream zipOutputStream = createZipOutputStream(response, pathName);
+        //循环将文件写入压缩流
+        DataOutputStream dataOutputStream = null;
+        for (int i = 1; i <= fileCount; i++) {
+            String tempFileName = fileName + "(" + i + ").xlsx";
+            File file = new File(tempFileName);
+            try {
+                //添加ZipEntry，并ZipEntry中写入文件流
+                zipOutputStream.putNextEntry(new ZipEntry(tempFileName));
+                dataOutputStream = new DataOutputStream(zipOutputStream);
+                InputStream inputStream = new FileInputStream(file);
+                byte[] b = new byte[100];
+                int length;
+                while ((length = inputStream.read(b)) != -1) {
+                    dataOutputStream.write(b, 0, length);
+                }
+                inputStream.close();
+                zipOutputStream.closeEntry();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            } finally {
+                // 删除产生的Excel文件
+                // file.delete();
+            }
+        }
+        try {
+            // 关闭流
+            dataOutputStream.flush();
+            dataOutputStream.close();
+            zipOutputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+    }
+
+    private static ZipOutputStream createZipOutputStream(HttpServletResponse response, String zipFileName) {
+        try {
+            //设置压缩包的名字
+            String downloadName = new String((zipFileName + ".zip").getBytes(), "ISO-8859-1");
+            response.setHeader("Content-Disposition", "attachment;fileName=\"" + downloadName + "\"");
+
+            //设置压缩流：直接写入response，实现边压缩边下载
+            ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
+            //设置压缩方法
+            zipOutputStream.setMethod(ZipOutputStream.DEFLATED);
+            return zipOutputStream;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
