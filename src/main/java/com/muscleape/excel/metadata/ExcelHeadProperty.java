@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Define the header attribute of excel
@@ -60,7 +61,8 @@ public class ExcelHeadProperty {
                 initOneColumnProperty(f);
             }
             //对列排序
-            Collections.sort(columnPropertyList);
+            // Collections.sort(columnPropertyList);
+            columnPropertyList = columnPropertyList.stream().sorted(Comparator.comparing(ExcelColumnProperty::getIndex)).collect(Collectors.toList());
             if (head == null || head.size() == 0) {
                 for (ExcelColumnProperty excelColumnProperty : columnPropertyList) {
                     headList.add(excelColumnProperty.getHead());

@@ -11,7 +11,8 @@ import java.util.List;
  * @author Muscleape
  */
 @Data
-public class ExcelColumnProperty implements Comparable<ExcelColumnProperty> {
+// public class ExcelColumnProperty implements Comparable<ExcelColumnProperty> {
+public class ExcelColumnProperty {
 
     /**
      *
@@ -26,7 +27,7 @@ public class ExcelColumnProperty implements Comparable<ExcelColumnProperty> {
     /**
      *
      */
-    private List<String> head = new ArrayList<String>();
+    private List<String> head = new ArrayList<>();
 
     /**
      * datetime format
@@ -40,10 +41,10 @@ public class ExcelColumnProperty implements Comparable<ExcelColumnProperty> {
      */
     private String keyValue;
 
-    @Override
-    public int compareTo(@NotNull ExcelColumnProperty o) {
-        int x = this.index;
-        int y = o.getIndex();
-        return (x < y) ? -1 : ((x == y) ? 0 : 1);
-    }
+    // @Override
+    // public int compareTo(@NotNull ExcelColumnProperty o) {
+    //     int x = this.index;
+    //     int y = o.getIndex();
+    //     return (x < y) ? -1 : ((x == y) ? 0 : 1);
+    // }
 }
