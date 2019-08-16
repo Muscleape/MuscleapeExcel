@@ -231,7 +231,7 @@ public class TypeUtil {
     }
 
     public static String getFieldStringValue(BeanMap beanMap, String fieldName, String format, String keyValue) {
-        String cellValue = null;
+        String cellValue = "";
         Object value = beanMap.get(fieldName);
         if (value != null) {
             try {

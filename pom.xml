@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.muscleape</groupId>
     <artifactId>muscleape-excel</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>MuscleapeExcel</name>
 
@@ -99,12 +99,12 @@
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
-            <version>9.0.20</version>
+            <version>9.0.19</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>5.1.6.RELEASE</version>
+            <version>5.1.7.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
