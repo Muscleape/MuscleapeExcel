@@ -45,6 +45,23 @@ public class WriteTest {
     }
 
     @Test
+    public void muscleapeWriteV2007Null() throws IOException {
+        OutputStream out = new FileOutputStream("D:\\Desktop\\临时文件\\2007.xlsx");
+        ExcelWriter writer = MuscleapeExcelFactory.getWriter(out);
+
+        //写一个sheet,数据全是List<String>模型映射关系
+        MuscleapeSheet sheet1 = new MuscleapeSheet(1, 3, MuscleapeWriteModel.class);
+        sheet1.setSheetName("第一个sheet");
+
+        // 需要写入Excel中的数据
+        writer.write(null, sheet1);
+
+        writer.finish();
+        out.close();
+
+    }
+
+    @Test
     public void muscleapeWriteV2007OldVersion() throws IOException {
         OutputStream out = new FileOutputStream("D:\\Desktop\\临时文件\\2007.xlsx");
         ExcelWriter writer = MuscleapeExcelFactory.getWriter(out);

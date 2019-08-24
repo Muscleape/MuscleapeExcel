@@ -17,7 +17,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,9 +45,6 @@ public class ExcelBuilderImpl implements ExcelBuilder {
 
     @Override
     public void addContent(List data, int startRow) {
-        if (CollectionUtils.isEmpty(data)) {
-            return;
-        }
         int rowNum = context.getCurrentSheet().getLastRowNum();
         if (rowNum == 0) {
             Row row = context.getCurrentSheet().getRow(0);
@@ -60,6 +56,10 @@ public class ExcelBuilderImpl implements ExcelBuilder {
         }
         if (rowNum < startRow) {
             rowNum = startRow;
+        }
+        if (CollectionUtils.isEmpty(data)) {
+            addOneRowOfDataToExcel(data, rowNum + 1);
+            return;
         }
         for (int i = 0; i < data.size(); i++) {
             int n = i + rowNum + 1;
@@ -112,6 +112,9 @@ public class ExcelBuilderImpl implements ExcelBuilder {
 
     private void addJavaObjectToExcel(Object oneRowData, Row row) {
         int i = 0;
+        if (oneRowData == null) {
+            return;
+        }
         BeanMap beanMap = BeanMap.create(oneRowData);
         for (ExcelColumnProperty excelHeadProperty : context.getExcelHeadProperty().getColumnPropertyList()) {
             BaseRowModel baseRowModel = (BaseRowModel) oneRowData;
