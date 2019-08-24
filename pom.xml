@@ -99,7 +99,7 @@
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
-            <version>9.0.19</version>
+            <version>9.0.21</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -128,10 +128,19 @@
                     <!-- 指定代码编译使用的JDK版本 -->
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
+                        <skip>true</skip>
                         <!-- 源代码使用的开发JDK版本 -->
                         <source>1.8</source>
                         <!-- 编译代码使用的开发JDK版本 -->
                         <target>1.8</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <skip>true</skip>
                     </configuration>
                 </plugin>
             </plugins>
