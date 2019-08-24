@@ -76,6 +76,7 @@ public class WorkBookUtil {
     public static Cell createCell(Row row, int colNum, CellStyle cellStyle, Object cellValue, Boolean isNum, Boolean isEmptyJsonObject, Boolean isDateFormatEmpty) {
         Cell cell = row.createCell(colNum);
         cell.setCellStyle(cellStyle);
+        cell.setCellValue(cellValue.toString());
         if (null != cellValue) {
             if (isNum && isEmptyJsonObject && isDateFormatEmpty) {
                 cell.setCellValue(Double.parseDouble(cellValue.toString()));

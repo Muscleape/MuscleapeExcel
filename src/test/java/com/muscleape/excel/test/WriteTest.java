@@ -1,22 +1,65 @@
 package com.muscleape.excel.test;
 
-import com.muscleape.excel.metadata.MuscleapeSheet;
-import com.muscleape.excel.test.listen.AfterWriteHandlerImpl;
-import com.muscleape.excel.test.model.WriteModel;
-import com.muscleape.excel.test.util.FileUtil;
-import com.muscleape.excel.MuscleapeExcelFactory;
 import com.muscleape.excel.ExcelWriter;
+import com.muscleape.excel.MuscleapeExcelFactory;
+import com.muscleape.excel.metadata.MuscleapeSheet;
 import com.muscleape.excel.metadata.MuscleapeTable;
 import com.muscleape.excel.support.ExcelTypeEnum;
+import com.muscleape.excel.test.listen.AfterWriteHandlerImpl;
+import com.muscleape.excel.test.model.MuscleapeWriteModel;
+import com.muscleape.excel.test.model.MuscleapeWriteModelOldVersion;
+import com.muscleape.excel.test.model.WriteModel;
+import com.muscleape.excel.test.util.FileUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+import org.springframework.util.Assert;
 
-import java.io.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.muscleape.excel.test.util.DataUtil.*;
 
 public class WriteTest {
+
+    @Test
+    public void muscleapeWriteV2007() throws IOException {
+        OutputStream out = new FileOutputStream("D:\\Desktop\\临时文件\\2007.xlsx");
+        ExcelWriter writer = MuscleapeExcelFactory.getWriter(out);
+
+        //写一个sheet,数据全是List<String>模型映射关系
+        MuscleapeSheet sheet1 = new MuscleapeSheet(1, 3, MuscleapeWriteModel.class);
+        sheet1.setSheetName("第一个sheet");
+
+        // 需要写入Excel中的数据
+        writer.write(createMuscleapeTestListObject(), sheet1);
+
+        writer.finish();
+        out.close();
+
+    }
+
+    @Test
+    public void muscleapeWriteV2007OldVersion() throws IOException {
+        OutputStream out = new FileOutputStream("D:\\Desktop\\临时文件\\2007.xlsx");
+        ExcelWriter writer = MuscleapeExcelFactory.getWriter(out);
+
+        //写一个sheet,数据全是List<String>模型映射关系
+        MuscleapeSheet sheet1 = new MuscleapeSheet(1, 3, MuscleapeWriteModelOldVersion.class);
+        sheet1.setSheetName("第一个sheet");
+
+        // 需要写入Excel中的数据
+        writer.write(createMuscleapeTestListObjectOldVersion(), sheet1);
+
+        writer.finish();
+        out.close();
+
+    }
 
     @Test
     public void writeV2007() throws IOException {
@@ -201,5 +244,14 @@ public class WriteTest {
 
         writer.finish();
         out.close();
+    }
+
+    public static void main(String[] args) {
+        String dateFormat = "";
+        String value = "1566554340000";
+        Assert.notNull(value, "不能为空");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(StringUtils.isBlank(dateFormat) ? "yyyy-MM-dd HH:mm:ss" : dateFormat);
+        LocalTime localTime = LocalTime.parse(value.toString(), dateTimeFormatter);
+        System.out.println(localTime.toString());
     }
 }

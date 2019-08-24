@@ -85,6 +85,11 @@ public class ExcelHeadProperty {
             excelHeadProperty.setIndex(p.index());
             excelHeadProperty.setFormat(p.format());
             excelHeadProperty.setKeyValue(p.keyValue());
+            excelHeadProperty.setFieldDataType(p.fieldDataType());
+            excelHeadProperty.setDateFormat(p.dateFormat());
+            excelHeadProperty.setDateMapJsonStr(p.dateMapJsonStr());
+            excelHeadProperty.setDateMapKeyNull(p.dateMapKeyNull());
+            excelHeadProperty.setDateMapKeyOther(p.dateMapKeyOther());
             excelColumnPropertyMap1.put(p.index(), excelHeadProperty);
         } else {
             ExcelColumnNum columnNum = f.getAnnotation(ExcelColumnNum.class);

@@ -1,11 +1,15 @@
 package com.muscleape.excel.test.util;
 
-import com.muscleape.excel.test.model.WriteModel;
 import com.muscleape.excel.metadata.MuscleapeFont;
 import com.muscleape.excel.metadata.MuscleapeTableStyle;
+import com.muscleape.excel.test.model.MuscleapeWriteModel;
+import com.muscleape.excel.test.model.MuscleapeWriteModelOldVersion;
+import com.muscleape.excel.test.model.WriteModel;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +32,68 @@ public class DataUtil {
             object.add(da);
         }
         return object;
+    }
+
+    /**
+     * 按照模型组装数据，测试字段类型处理
+     *
+     * @return java.util.List<com.muscleape.excel.test.model.MuscleapeWriteModel>
+     * @author Muscleape
+     * @date 2019/8/23 16:47
+     */
+    public static List<MuscleapeWriteModel> createMuscleapeTestListObject() {
+        List<MuscleapeWriteModel> modelList = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateStr = "2019-08-23 17:59:00";
+        // 2019-08-23 17:59:00 对应的时间戳
+        Long dateLong = 1566554340000L;
+        try {
+            MuscleapeWriteModel modelOne = MuscleapeWriteModel.builder()
+                    .id(1)
+                    .str("我的名字")
+                    .date(dateFormat.parse(dateStr))
+                    .dateStr(dateStr)
+                    .timestampLong(dateLong)
+                    .timestampString("1566554340000")
+                    .intKeyValue(1)
+                    .intStrKeyValue(1)
+                    .strKeyValue("1")
+                    .emptyKeyValue("1")
+                    .otherKeyValueNoDefault("6")
+                    .otherKeyValueWithDefault("6")
+                    .nullKeyValueNoDefault(null)
+                    .nullKeyValueWithDefault(null)
+                    .build();
+            modelList.add(modelOne);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return modelList;
+    }
+
+    public static List<MuscleapeWriteModelOldVersion> createMuscleapeTestListObjectOldVersion() {
+        List<MuscleapeWriteModelOldVersion> modelList = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateStr = "2019-08-23 17:59:00";
+        // 2019-08-23 17:59:00 对应的时间戳
+        Long dateLong = 1566554340000L;
+        try {
+            MuscleapeWriteModelOldVersion modelOne = MuscleapeWriteModelOldVersion.builder()
+                    .id(1)
+                    .str("我的名字")
+                    .date(dateFormat.parse(dateStr))
+                    .dateStr(dateStr)
+                    .timestampLong(dateLong)
+                    .intKeyValue(1)
+                    .intStrKeyValue(1)
+                    .strKeyValue("1")
+                    .emptyKeyValue("1")
+                    .build();
+            modelList.add(modelOne);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return modelList;
     }
 
     public static List<List<String>> createTestListStringHead() {

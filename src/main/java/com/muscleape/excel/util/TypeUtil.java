@@ -3,6 +3,7 @@ package com.muscleape.excel.util;
 import com.alibaba.fastjson.JSONObject;
 import com.muscleape.excel.metadata.ExcelColumnProperty;
 import com.muscleape.excel.metadata.ExcelHeadProperty;
+import com.muscleape.excel.support.FieldDataTypeEnum;
 import net.sf.cglib.beans.BeanMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -12,6 +13,8 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -94,7 +97,7 @@ public class TypeUtil {
     }
 
     public static Boolean isNum(Field field) {
-        if (field == null) {
+        if (field == null || field.equals("")) {
             return false;
         }
         if (Integer.class.equals(field.getType()) || int.class.equals(field.getType())) {
@@ -230,9 +233,116 @@ public class TypeUtil {
         return simpleDateFormat.format(cellValue);
     }
 
-    public static String getFieldStringValue(BeanMap beanMap, String fieldName, String format, String keyValue) {
-        String cellValue = "";
+    public static String getFieldStringValue(BeanMap beanMap, ExcelColumnProperty excelHeadProperty) {
+
+        // 字段名称
+        String fieldName = excelHeadProperty.getField().getName();
+        // 原日期格式
+        String format = excelHeadProperty.getFormat();
+        // 原键值对转换
+        String keyValue = excelHeadProperty.getKeyValue();
+        // 数据类型
+        FieldDataTypeEnum fieldDataType = excelHeadProperty.getFieldDataType();
+        // 日期格式
+        String dateFormat = excelHeadProperty.getDateFormat();
+        // 键值对JSON字符串
+        String dateMapJsonStr = excelHeadProperty.getDateMapJsonStr();
+        // 键值对中键为null的处理
+        String dateMapKeyNull = excelHeadProperty.getDateMapKeyNull();
+        // 键值对中键为不存在的值时的处理
+        String dateMapKeyOther = excelHeadProperty.getDateMapKeyOther();
+
         Object value = beanMap.get(fieldName);
+        String cellValue;
+        switch (fieldDataType) {
+            case NORMAL:
+                cellValue = handleOldVersionData(value, format, keyValue);
+                break;
+            case MAP:
+                cellValue = handleMapData(value, dateMapJsonStr, dateMapKeyNull, dateMapKeyOther);
+                break;
+            case DATE:
+                cellValue = handleDateData(value, dateFormat);
+                break;
+            default:
+                cellValue = value.toString();
+                break;
+        }
+        return cellValue;
+    }
+
+    /**
+     * 处理日期类型数据
+     *
+     * @param value
+     * @param dateFormat
+     * @return java.lang.String
+     * @author Muscleape
+     * @date 2019/8/24 14:57
+     */
+    private static String handleDateData(Object value, String dateFormat) {
+        if (value == null) {
+            return value.toString();
+        }
+        if (value instanceof Date) {
+            return TypeUtil.formatDate((Date) value, dateFormat);
+        }
+        if (value instanceof Long) {
+            return TypeUtil.formatDateTimeStamp((Long) value, dateFormat);
+        }
+        if (value instanceof String && isNumberFormat(value.toString())) {
+            // 字符串类型时间戳
+            return TypeUtil.formatDateTimeStamp(Long.valueOf(value.toString()), dateFormat);
+        }
+        if (value instanceof String) {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(StringUtils.isBlank(dateFormat) ? "yyyy-MM-dd HH:mm:ss" : dateFormat);
+            try {
+                LocalTime localTime = LocalTime.parse(value.toString(), dateTimeFormatter);
+                return localTime.toString();
+            } catch (Exception e) {
+            }
+        }
+        return value.toString();
+    }
+
+    /**
+     * 处理键值对类型转换数据
+     *
+     * @param value
+     * @param dateMapJsonStr
+     * @param dateMapKeyNull
+     * @param dateMapKeyOther
+     * @return java.lang.String
+     * @author Muscleape
+     * @date 2019/8/24 14:46
+     */
+    private static String handleMapData(Object value, String dateMapJsonStr, String dateMapKeyNull, String dateMapKeyOther) {
+        if (StringUtils.isNotBlank(dateMapJsonStr)) {
+            JSONObject jsonObject = JSONObject.parseObject(dateMapJsonStr);
+            if (value == null) {
+                return StringUtils.isBlank(dateMapKeyNull) ? "null" : dateMapKeyNull;
+            }
+            if (jsonObject.containsKey(value) || jsonObject.containsKey(value.toString())) {
+                return jsonObject.get(value) == null ? jsonObject.get(value.toString()).toString() : jsonObject.get(value).toString();
+            } else {
+                return StringUtils.isBlank(dateMapKeyOther) ? value.toString() : dateMapKeyOther;
+            }
+        }
+        return value.toString();
+    }
+
+    /**
+     * 兼容旧版本数据，不指定数据类型时
+     *
+     * @param value
+     * @param format
+     * @param keyValue
+     * @return java.lang.String
+     * @author Muscleape
+     * @date 2019/8/24 14:34
+     */
+    private static String handleOldVersionData(Object value, String format, String keyValue) {
+        String cellValue = value.toString();
         if (value != null) {
             try {
                 if (StringUtils.isNotBlank(format)) {
@@ -241,26 +351,24 @@ public class TypeUtil {
                     } else if ((value instanceof Long) && StringUtils.isNotBlank(format)) {
                         // 时间戳类型时间格式化
                         cellValue = TypeUtil.formatDateTimeStamp((Long) value, format);
-                    } else {
-                        cellValue = value.toString();
                     }
                 }
                 if (StringUtils.isNotBlank(keyValue)) {
                     JSONObject jsonObject = JSONObject.parseObject(keyValue);
-                    if (null != jsonObject && jsonObject.size() > 0) {
-                        cellValue = String.valueOf(jsonObject.get(value));
+                    if (jsonObject.containsKey(value) || jsonObject.containsKey(value.toString())) {
+                        cellValue = jsonObject.get(value) == null ? jsonObject.get(value.toString()).toString() : jsonObject.get(value).toString();
                     } else {
-                        cellValue = value.toString();
+                        cellValue = "";
                     }
                 }
             } catch (Exception e) {
-                cellValue = value.toString();
             }
         }
         return cellValue;
     }
 
-    public static Map getFieldValues(List<String> stringList, ExcelHeadProperty excelHeadProperty, Boolean use1904WindowDate) {
+    public static Map getFieldValues(List<String> stringList, ExcelHeadProperty excelHeadProperty, Boolean
+            use1904WindowDate) {
         Map map = new HashMap();
         for (int i = 0; i < stringList.size(); i++) {
             ExcelColumnProperty columnProperty = excelHeadProperty.getExcelColumnProperty(i);
@@ -273,5 +381,36 @@ public class TypeUtil {
             }
         }
         return map;
+    }
+
+    /**
+     * 是否是数字格式
+     *
+     * @param number
+     * @return boolean
+     * @author Muscleape
+     * @date 2019/8/24 15:37
+     */
+    private static boolean isNumberFormat(String number) {
+        if (StringUtils.isBlank(number)) {
+            return false;
+        }
+        // 负号
+        int minusIndex = number.indexOf("-");
+        // 小数点
+        int docIndex = number.indexOf(".");
+        if (minusIndex > 0) {
+            return false;
+        }
+        if (minusIndex == 0) {
+            number = number.substring(1);
+        }
+        if (docIndex < 0) {
+            return StringUtils.isNumeric(number);
+        } else {
+            String num1 = number.substring(0, docIndex);
+            String num2 = number.substring(docIndex + 1);
+            return StringUtils.isNumeric(num1) && StringUtils.isNumeric(num2);
+        }
     }
 }

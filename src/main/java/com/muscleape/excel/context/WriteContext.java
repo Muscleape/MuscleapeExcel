@@ -100,7 +100,6 @@ public class WriteContext {
         this.afterWriteHandler = afterWriteHandler;
         this.workbook = WorkBookUtil.createWorkBook(templateInputStream, excelType);
         this.defaultCellStyle = StyleUtil.buildDefaultCellStyle(this.workbook);
-
     }
 
     /**

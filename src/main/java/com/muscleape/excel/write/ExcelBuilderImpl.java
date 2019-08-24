@@ -115,9 +115,9 @@ public class ExcelBuilderImpl implements ExcelBuilder {
         BeanMap beanMap = BeanMap.create(oneRowData);
         for (ExcelColumnProperty excelHeadProperty : context.getExcelHeadProperty().getColumnPropertyList()) {
             BaseRowModel baseRowModel = (BaseRowModel) oneRowData;
-            String cellValue = TypeUtil.getFieldStringValue(beanMap, excelHeadProperty.getField().getName(), excelHeadProperty.getFormat(), excelHeadProperty.getKeyValue());
+            String cellValue = TypeUtil.getFieldStringValue(beanMap, excelHeadProperty);
             CellStyle cellStyle = baseRowModel.getStyle(i) != null ? baseRowModel.getStyle(i) : context.getCurrentContentCellStyle();
-            Cell cell = WorkBookUtil.createCell(row, i, cellStyle, cellValue, TypeUtil.isNum(excelHeadProperty.getField()), TypeUtil.isEmptyJsonObject(excelHeadProperty.getKeyValue()), StringUtils.isEmpty(excelHeadProperty.getFormat()));
+            Cell cell = WorkBookUtil.createCell(row, i, cellStyle, cellValue);
             if (null != context.getAfterWriteHandler()) {
                 context.getAfterWriteHandler().cell(i, cell);
             }
